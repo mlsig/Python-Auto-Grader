@@ -9,7 +9,7 @@ Teammates: Marisa Sigas, Anthony Anderson
 
 $serverName = "sql.njit.edu"; //server name (mysql)
 $userName = "gc288"; //giancarlo's ucid
-$serverPassword = "auriga26"; //super secret password, avert your eyes!
+$serverPassword = "camilla56"; //super secret password, avert your eyes!
 $dbName = "gc288";
 
 /*collects login info*/
