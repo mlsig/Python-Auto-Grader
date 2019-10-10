@@ -1,0 +1,24 @@
+need: qid, title, user solution, I/O, rubric)
+
+want to retrieve by exam and student id, exan should have 3 questions
+
+questions{
+    qid1{
+        title
+        sol //user solution
+        io{
+            //array of inputs and output. 2 cases, in and out separated by semi-colon
+        }
+        rubric{
+            //array of point values for each part. 2 aspects to be graded, proper name and proper output, adding all array values will result in exam point total.
+        }
+    }
+    qid2{...}
+    qid3{...}
+}
+
+
+questions:
+returning Hello World!
+returning the double of a number
+returning the sqaure of a number
