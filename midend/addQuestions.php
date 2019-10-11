@@ -23,9 +23,4 @@ $opts = [
 $ch = curl_init();
 curl_setopt_array($ch,$opts);
 curl_exec($ch);
-
-//output
-$output = json_decode(file_get_contents('https://web.njit.edu/~gc288/490/questionAdd.php'), true);
-
 ?>
-

@@ -1,12 +1,9 @@
 <?php
 /*Adds a question input from an instructor to the database*/
 
-//grabs credentials (title, prompt, difficulty, topic, sampleIO)
+//grabs credentials (title, qids)
 $title = $_POST["title"];
-$prompt = $_POST["prompt"]; //ex: "print 'A+' if input is '100'
-$difficulty = $_POST["difficulty"]; //ex: "hard"
-$topic = $_POST["topic"]; //ex: "loops"
-$sampleIO = $_POST["sampleIO"];
+$qidJSON = $_POST["qidJSON"]; //of the form: {qid1:"8,4", qid4:"7,4"}
 
 //verifies connection to database
 $serverName = "sql.njit.edu"; //server name (mysql)
@@ -18,22 +15,30 @@ if ($connection->connect_error){
   echo "Could not connect to SQL database. Error: " . $connection -> connect_error;
 }
 
-//generates unique question identifier
-$query = "SELECT qid FROM QUESTIONS WHERE qid = (SELECT MAX(qid) FROM QUESTIONS);";
+//generates unique exam identifier
+$query = "SELECT eid FROM EXAMS WHERE eid = (SELECT MAX(eid) FROM EXAMS);";
 $queryResult = $connection->query($query); //runs query
 if($queryResult -> num_rows == 0){ //checks if table is empty
-  $qid = "qid0";
+  $eid = "eid0";
 }
 else{
-  $maxqid = mysqli_fetch_assoc($queryResult)["qid"];
-  $numString = explode("d", $maxqid)[1]; //grabs the number from the max qid
+  $maxqid = mysqli_fetch_assoc($queryResult)["eid"];
+  $numString = explode("d", $maxqid)[1]; //grabs the number from the max eid
   $num = intval($numString) + 1;
-  $qid = "qid{$num}";
+  $eid = "eid{$num}";
 }
 
-//inserts into the QUESTIONS table
-$query = "INSERT INTO QUESTIONS (qid, qtitle, prompt, difficulty, topic) VALUES (\"{$qid}\", \"{$title}\", \"{$prompt}\", \"{$difficulty}\", \"{$topic}\");";
+//inserts into the EXAM table
+$query = "INSERT INTO EXAMS (eid, etitle) VALUES (\"{$eid}\", \"{$title}\")";
 $queryResult = $connection->query($query); //runs query
+
+//inserts all the questions for the exam
+$qidList = explode(",", $qids)
+foreach ($qidList as &$qid){
+  $query = "INSERT INTO EXAM_QUESTIONS (eid, qid) VALUES (\"{$eid}\", \"{$qid}\")";
+  $queryResults = $connection->query($query);
+}
+
 
 //separates input and output and inserts into IO table
 $split = explode(";", $sampleIO);
