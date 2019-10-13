@@ -1,7 +1,12 @@
 <?php
 /*Adds a question input from an instructor to the database*/
+/*
+Backend to grab exam taken by student and stores student solution in DB.
+Version: beta
+Author: Giancarlo Calle
+*/
 
-//grabs credentials (title, prompt, difficulty, topic, sampleIO)
+//credentials: (title, prompt, difficulty, topic, sampleIO)
 $title = $_POST["title"];
 $prompt = $_POST["prompt"]; //ex: "print 'A+' if input is '100'
 $difficulty = $_POST["difficulty"]; //ex: "hard"

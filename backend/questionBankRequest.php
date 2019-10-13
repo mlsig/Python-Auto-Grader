@@ -1,4 +1,10 @@
 <?php
+/*gives all the question from the database*/
+/*
+Backend to grab exam taken by student and stores student solution in DB.
+Version: beta
+Author: Giancarlo Calle
+*/
 
 $serverName = "sql.njit.edu"; //server name (mysql)
 $userName = "gc288"; //giancarlo's ucid

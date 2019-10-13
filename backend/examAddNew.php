@@ -1,9 +1,14 @@
 <?php
-/*Adds a question input from an instructor to the database*/
+/*Adds an exam to the database*/
+/*
+Backend to grab exam taken by student and stores student solution in DB.
+Version: beta
+Author: Giancarlo Calle
+*/
 
-//grabs credentials (title, qids)
-$title = $_POST["title"];
-$qidJSON = $_POST["qidJSON"]; //of the form: {qid1:"8,4", qid4:"7,4"}
+//credentials: (title, qidJSON)
+$eid = $_POST["title"]
+$qidJSON = $_POST["qidJSON"]; //of the form: "qid1:[8,4];qid4:[7,4]}"
 
 //verifies connection to database
 $serverName = "sql.njit.edu"; //server name (mysql)
@@ -22,34 +27,28 @@ if($queryResult -> num_rows == 0){ //checks if table is empty
   $eid = "eid0";
 }
 else{
-  $maxqid = mysqli_fetch_assoc($queryResult)["eid"];
-  $numString = explode("d", $maxqid)[1]; //grabs the number from the max eid
+  $maxeid = mysqli_fetch_assoc($queryResult)["eid"];
+  $numString = explode("d", $maxeid)[1]; //grabs the number from the max eid
   $num = intval($numString) + 1;
   $eid = "eid{$num}";
 }
 
 //inserts into the EXAM table
 $query = "INSERT INTO EXAMS (eid, etitle) VALUES (\"{$eid}\", \"{$title}\")";
-$queryResult = $connection->query($query); //runs query
+$queryResult = $connection->query($query);
 
-//inserts all the questions for the exam
-$qidList = explode(",", $qids)
-foreach ($qidList as &$qid){
-  $query = "INSERT INTO EXAM_QUESTIONS (eid, qid) VALUES (\"{$eid}\", \"{$qid}\")";
-  $queryResults = $connection->query($query);
-}
-
-
-//separates input and output and inserts into IO table
-$split = explode(";", $sampleIO);
+//parses $qidJSON for qid and points. Of the form "qid1:[8,4];qid4:[7,4]"
+$qidJSON = "qid1:[8,4];qid4:[7,4]";
+$split = explode(";", $qidJSON);
 foreach ($split as &$val){
-  $io = explode(",", $val);
-  $in = $io[0];
-  $out = $io[1];
-  $query = "INSERT INTO IO (qid, input, output) VALUES (\"{$qid}\", \"{$in}\", \"{$out}\");";
-  $queryResult = $connection->query($query); //runs query
+  $split2 = explode(":", $val);
+  $qid = $split2[0];
+  $points = $split2[1];
+  $query = "INSERT INTO EXAM_QUESTIONS VALUES (\"{$eid}\", \"{$qid}\", \"{$points}\")"
+  $queryResult = $connection->query($query);
 }
 
+//echos back to confirm
 echo "{ \"qid\" : \"{$qid}\", \"title\" : \"{$title}\", \"prompt\" : \"{$prompt}\", \"difficulty\" : \"{$difficulty}\", \"topic\" : \"{$topic}\", \"sampleIO\" : \"{$sampleIO}\" }";
 
 ?>
