@@ -1,10 +1,9 @@
 <?php
 
 /*
-Backend for a basic login page.
-Version: alpha
+Backend to log in user to student or instructor portal.
+Version: beta
 Author: Giancarlo Calle
-Teammates: Marisa Sigas, Anthony Anderson
 */
 
 $serverName = "sql.njit.edu"; //server name (mysql)
@@ -24,17 +23,21 @@ if ($connection -> connect_error){
 }
 
 /*connects to the table that stores usernames and passwords*/
-$verifyInfo = "SELECT ucid, password FROM Creds WHERE Creds.ucid=\"" . $u . "\" AND Creds.password=\"" . $hashed . "\"";
+$verifyInfo = "SELECT ucid, password FROM VALIDATION WHERE ucid=\"" . $u . "\" AND password=\"" . $hashed . "\"";
 $queryResult = $connection->query($verifyInfo); //runs query
 
 if ($queryResult -> num_rows == 0){
-  $valid = "n";
+  echo "{ \"level\" : \"n\" }";
 }
 else{
-  $valid = "y";
+  $verifyLevel = "SELECT level FROM VALIDATION WHERE ucid = \"" . $u . "\"";
+  $queryResult = $connection->query($verifyLevel);
+
+  $level = mysqli_fetch_assoc($queryResult)["level"]; //grabs "i" or "s"
+
+  echo "{ \"level\" : \"" . $level . "\" }";
 }
 
-echo $valid;
 mysqli_close($connection);
 
 ?>
