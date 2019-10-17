@@ -1,7 +1,7 @@
 <?php
-/*Adds a question input from an instructor to the database*/
+
 /*
-Backend to grab exam taken by student and stores student solution in DB.
+Backend to add a question to the DB.
 Version: beta
 Author: Giancarlo Calle
 */
@@ -11,7 +11,7 @@ $title = $_POST["title"];
 $prompt = $_POST["prompt"]; //ex: "print 'A+' if input is '100'
 $difficulty = $_POST["difficulty"]; //ex: "hard"
 $topic = $_POST["topic"]; //ex: "loops"
-$sampleIO = $_POST["sampleIO"];
+$sampleIO = $_POST["sampleIO"]; //of form in1,out1;in2,out2
 
 //verifies connection to database
 $serverName = "sql.njit.edu"; //server name (mysql)

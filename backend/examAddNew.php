@@ -1,14 +1,15 @@
 <?php
-/*Adds an exam to the database*/
+
 /*
-Backend to grab exam taken by student and stores student solution in DB.
+Backend to add a new exam created by an instructor to the DB.
 Version: beta
 Author: Giancarlo Calle
 */
 
-//credentials: (title, qidJSON)
-$eid = $_POST["title"]
-$qidJSON = $_POST["qidJSON"]; //of the form: "qid1:[8,4];qid4:[7,4]}"
+//credentials: (eid, qids)
+$title = $_POST["title"];
+$qids = $_POST["qids"]; //of the form: "qid1,qid2"
+$points = $_POST["points"]; //of the form: "4,2"
 
 //verifies connection to database
 $serverName = "sql.njit.edu"; //server name (mysql)
@@ -19,6 +20,7 @@ $connection = new mysqli($serverName, $userName, $serverPassword, $dbName); //co
 if ($connection->connect_error){
   echo "Could not connect to SQL database. Error: " . $connection -> connect_error;
 }
+
 
 //generates unique exam identifier
 $query = "SELECT eid FROM EXAMS WHERE eid = (SELECT MAX(eid) FROM EXAMS);";
@@ -37,18 +39,26 @@ else{
 $query = "INSERT INTO EXAMS (eid, etitle) VALUES (\"{$eid}\", \"{$title}\")";
 $queryResult = $connection->query($query);
 
-//parses $qidJSON for qid and points. Of the form "qid1:[8,4];qid4:[7,4]"
-$qidJSON = "qid1:[8,4];qid4:[7,4]";
-$split = explode(";", $qidJSON);
-foreach ($split as &$val){
-  $split2 = explode(":", $val);
-  $qid = $split2[0];
-  $points = $split2[1];
-  $query = "INSERT INTO EXAM_QUESTIONS VALUES (\"{$eid}\", \"{$qid}\", \"{$points}\")"
+
+//parses $qids for qid and points. Of the form "qid0:[8,4];qid1:[7,4]"
+$qidList = explode(",", $qids);
+$pointList = explode(",", $points);
+for ($i = 0; $i < count($qidList); $i++){
+  $qid = $qidList[$i];
+  $points = $pointList[$i];
+  $query = "INSERT INTO EXAM_QUESTIONS VALUES (\"{$eid}\", \"{$qid}\", \"{$points}\")";
   $queryResult = $connection->query($query);
 }
 
+//inserts into EXAM_STATUS table to check status of each student for each exam
+$q = "SELECT ucid FROM VALIDATION WHERE level = \"s\"";
+$qResult = $connection->query($q);
+while($ucid = mysqli_fetch_assoc($qResult)["ucid"]){
+  $q = "INSERT INTO EXAM_STATUS (eid, ucid, status) VALUES (\"{$eid}\", \"{$ucid}\", \"No Submission\")";
+  $qResult = $connection->query($q);
+}
+
 //echos back to confirm
-echo "{ \"qid\" : \"{$qid}\", \"title\" : \"{$title}\", \"prompt\" : \"{$prompt}\", \"difficulty\" : \"{$difficulty}\", \"topic\" : \"{$topic}\", \"sampleIO\" : \"{$sampleIO}\" }";
+echo "{ \"eid\" : \"{$eid}\", \"title\" : \"{$title}\" }";
 
 ?>

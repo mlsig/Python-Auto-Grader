@@ -1,7 +1,7 @@
 <?php
-/*gives all the question from the database*/
+
 /*
-Backend to grab exam taken by student and stores student solution in DB.
+Backend to send all question from DB to frontend.
 Version: beta
 Author: Giancarlo Calle
 */
@@ -18,18 +18,17 @@ if ($connection->connect_error){
 $query = "SELECT * FROM QUESTIONS;";
 $queryResult = $connection->query($query);
 
-$json = "{";
-
+$json = "[";
 while($row = mysqli_fetch_assoc($queryResult)){
   $qid = $row["qid"];
   $title = $row["qtitle"];
   $prompt = $row["prompt"];
   $diff = $row["difficulty"];
   $topic = $row["topic"];
-
-  $json = $json . "{$qid}:{ title:\"{$title}\", prompt:\"{$prompt}\", difficulty:\"{$prompt}\", topic:\"{$topic}\" },";
+  $json = $json . "{\"qid\":\"{$qid}\", \"title\":\"{$title}\", \"prompt\":\"{$prompt}\", \"difficulty\":\"{$diff}\", \"topic\":\"{$topic}\" },";
 }
-$json = $json . " }";
+$json = substr($json, 0, -1); //removes last comma
+$json = $json . " ]";
 
 echo $json;
 ?>
