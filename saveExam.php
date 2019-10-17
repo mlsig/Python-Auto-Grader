@@ -1,19 +1,15 @@
 <?php
 //get data from FE
 $n = $_POST['title'];
-$p = $_POST['prompt'];
-$d = $_POST['difficulty'];
-$t = $_POST['topic'];
-$s = $_POST['sampleIO'];
+$p = $_POST['qIDs'];
+$d = $_POST['points'];
 
 //send to BE
-$url = 'https://web.njit.edu/~gc288/490/questionAdd.php';
+$url = 'https://web.njit.edu/~gc288/490/examAddNew.php';
 $q = [
     'title' => $n,
-    'prompt' => $p,
-    'difficulty' => $d,
-    'topic' => $t,
-    'sampleIO' => $s,
+    'qIDs' => $p,
+    'points' => $d,
 ];
 $opts = [
     CURLOPT_URL => $url,

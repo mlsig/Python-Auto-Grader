@@ -30,11 +30,8 @@ foreach ($quesions as &$q) {
     $out = $q[3];
     $rubric = $q[4]
     //rubric should be an array
-    foreach ($rubric as &$point) {
-    
-    }
     //do the grading
-    $command = escapeshellcmd("python3 grade.py " . $out . " " . $sol)
+    $command = escapeshellcmd("python3 grade.py " . $func . " " . $out . " " . $sol . " " . $rubric)
     $output = shell_exec($command);
     //create array for the new question data
     //save the grade into some question object in an array
@@ -42,7 +39,7 @@ foreach ($quesions as &$q) {
 }    
     
 //send final array to gc
-$url = 'https://web.njit.edu/~gc288/490/saveExam.php';
+$url = 'https://web.njit.edu/~gc288/490/examAddAutoGrade.php';
 $out = [
     //exam id
     //array of new quesions
@@ -58,7 +55,7 @@ curl_exec($ch);
 
     
 //output confirmation
-$output = json_decode(file_get_contents('https://web.njit.edu/~gc288/490/saveExam.php'), true);
+$output = json_decode(file_get_contents('https://web.njit.edu/~gc288/490/examAddAutoGrade.php'), true);
 
 ?>
 
