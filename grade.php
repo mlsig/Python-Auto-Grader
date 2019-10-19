@@ -1,61 +1,63 @@
 <?php
-//get data from FE
-$e = $_POST['exID'];
-$s = $_POST['sID'];
+//get data from gc
+//$j = $_POST['json'];
+$j = '[{
+    "qid": "qid1",
+    "title": "doubleIt",
+    "sol": "print(2)",
+    "io": ["\"none\";2 "],
+    "rubric": [1, 4]
+}]';
 
-//get question ID's from gc
-$url = 'https://web.njit.edu/~gc288/490/getExQuestions.php';
-$exam = [
-    'exID' => $e,
-    'sID' => $s,
-];
-$opts = [
-    CURLOPT_URL => $url,
-    CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => $exam,
-];
-$ch = curl_init();
-curl_setopt_array($ch,$opts);
-curl_exec($ch);
+//make data list
+$data = json_decode($j);
 
-//save array of questions (need: qid, title, user solution, I/O, rubric)
-//above will be whats returned in each item of the questions array, with an updated rubric array
-$questions = json_decode(file_get_contents('https://web.njit.edu/~gc288/490/getExQuestions'), true);
+//array for the new question data
+$qs = [];
 
-//create array to save new question data
-foreach ($quesions as &$q) {
-    //get q info
-    $func = $q[1];
-    $sol = $q[2];
-    $out = $q[3];
-    $rubric = $q[4]
-    //rubric should be an array
-    //do the grading
-    $command = escapeshellcmd("python3 grade.py " . $func . " " . $out . " " . $sol . " " . $rubric)
+//var to store final grade;
+$g = 0;
+
+foreach ($data as &$q) {
+
+	//get info
+	$qid = $q->qid;
+	$t = $q->title;
+	$s = $q->sol;
+	$io = $q->io;
+	$r = $q->rubric;
+	
+	$test = [];
+	foreach ($io as &$dataset){
+        $io_arr = explode (";", $dataset); 
+        $in = $io_arr[0];
+        $out = $io_arr[1];
+        $test[$in] = $out;
+	}
+	
+	$points = [];
+	foreach ($r as &$p){
+        array_push($points, $p);
+	}
+	
+	//pass user's code to a file
+	$userProgram = fopen("sol.py", "w");
+	fwrite($userProgram, "#!/usr/bin/env python\n");
+	fwrite($userProgram, $s);
+    
+    //setup file for execution
+    $c = "chmod +x sol.py";
+    $command = escapeshellcmd($c);
     $output = shell_exec($command);
-    //create array for the new question data
-    //save the grade into some question object in an array
+    
+    //check code results
+	$c = "python3 sol.py";
+    $command = escapeshellcmd($c);
+	$output = shell_exec($command);
+	echo "bruh";
     echo $output;
-}    
     
-//send final array to gc
-$url = 'https://web.njit.edu/~gc288/490/examAddAutoGrade.php';
-$out = [
-    //exam id
-    //array of new quesions
-];
-$opts = [
-    CURLOPT_URL => $url,
-    CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => $out,
-];
-$ch = curl_init();
-curl_setopt_array($ch,$opts);
-curl_exec($ch);
-
-    
-//output confirmation
-$output = json_decode(file_get_contents('https://web.njit.edu/~gc288/490/examAddAutoGrade.php'), true);
-
+    fclose($userProgram);
+}  
 ?>
 
