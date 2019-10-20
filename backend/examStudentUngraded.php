@@ -37,7 +37,7 @@ while($row = mysqli_fetch_assoc($qResult)){
   $status = $row["status"];
   $title = $row["etitle"];
 
-  if($status == "Graded"){
+  if($status == "Ungraded"){
     $json = $json . "{ \"eid\":\"{$eid}\", \"title\":\"{$title}\" },";
   }
 }

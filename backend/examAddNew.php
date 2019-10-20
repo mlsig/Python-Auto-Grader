@@ -9,7 +9,7 @@ Author: Giancarlo Calle
 //credentials: (eid, qids)
 $title = $_POST["title"];
 $qids = $_POST["qids"]; //of the form: "qid1,qid2"
-$points = $_POST["points"]; //of the form: "4,2"
+$points = $_POST["points"]; //of the form: "4,2;2,3"
 
 //verifies connection to database
 $serverName = "sql.njit.edu"; //server name (mysql)
@@ -42,7 +42,7 @@ $queryResult = $connection->query($query);
 
 //parses $qids for qid and points. Of the form "qid0:[8,4];qid1:[7,4]"
 $qidList = explode(",", $qids);
-$pointList = explode(",", $points);
+$pointList = explode(";", $points);
 for ($i = 0; $i < count($qidList); $i++){
   $qid = $qidList[$i];
   $points = $pointList[$i];

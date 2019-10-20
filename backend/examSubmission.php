@@ -9,7 +9,7 @@ Author: Giancarlo Calle
 //credentials: (codeJSON)
 $codeJSON = $_POST["codeJSON"]; //of the form: [{"qid":"qid0", "code":"example code"}, {"qid":"qid1", "code":"sample"}]
 
-$codeJSON = '{"eid": "eid1", "ucid":"gc288", "solutions":[{"qid":"qid0", "sol":"I tried so hard, and got so far"},{"qid":"qid1", "sol":"uwuwuw"}] }';
+$codeJSON = "{\"eid\": \"eid0\", \"ucid\":\"gc288\", \"solutions\":[{\"qid\":\"qid0\", \"sol\":\"print('hello')\"},{\"qid\":\"qid1\", \"sol\":\"print('world')\"}] }";
 $decoded = json_decode($codeJSON);
 $eid = $decoded->eid;
 $ucid = $decoded->ucid;
@@ -26,7 +26,7 @@ if ($c->connect_error){
 
 //Inserts code from codeJSON into EXAM_POINTS
 $array = $decoded->solutions;
-$json = "{";
+$json = "[";
 foreach($array as &$question){
   $qid = $question->qid;
   $sol = $question->sol;
@@ -55,20 +55,18 @@ foreach($array as &$question){
   //grabs point values for question
   $q = "SELECT points FROM EXAM_QUESTIONS WHERE eid = \"{$eid}\" AND qid = \"{$qid}\"";
   $qResult = $c->query($q);
-  $rubric = mysqli_fetch_assoc($qResult)["points"];
+  $rubric = "[" . mysqli_fetch_assoc($qResult)["points"] . "]";
 
   //adds code to JSON to send to midend for auto grading
-  $json = $json . "\"{$qid}\" :{ \"title\":\"{$title}\", \"sol\":\"{$sol}\", \"io\":{$io}, \"rubric\":{$rubric}},";
+  $json = $json . "{\"qid\":\"{$qid}\", \"title\":\"{$title}\", \"sol\":\"{$sol}\", \"io\":{$io}, \"rubric\":{$rubric}},";
 
 }
 $json = substr($json, 0, -1); //removes last comma
-$json = $json . "}";
-echo $json;
-
+$json = $json . "]";
 
 //sends json to midend to grade
 $url = 'https://web.njit.edu/~ms2437/cs490/beta/grade.php';
-$creds = ['json' => $jsonToSend];
+$creds = ['json' => $json];
 $opts = [
   CURLOPT_URL => $url,
   CURLOPT_POST => true,
@@ -77,7 +75,9 @@ $opts = [
 ];
 $ch = curl_init();
 curl_setopt_array($ch,$opts);
-$autoPoints = curl_exec($ch);
-echo $autoPoints;
+$autoPoints = curl_exec($ch); //of the form {"eid":"eid0", "qids":"qid0,qid1", "rubric":"0,1;2,1"}
+
+//submits info
+
 
 ?>
