@@ -1,7 +1,7 @@
 <?php
 //get data from FE
 $n = $_POST['title'];
-$p = $_POST['qIDs'];
+$p = $_POST['qids'];
 $d = $_POST['points'];
 
 //send to BE
