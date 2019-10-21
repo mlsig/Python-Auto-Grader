@@ -1,22 +1,25 @@
 <?php
 //get data from gc
-//$j = $_POST['json'];
+$j = $_POST['json'];
+
+/*
 $j = '[{
     "qid": "qid1",
     "title": "doubleIt",
-    "sol": "def doubleit(num):\n\treturn num*2",
+    "sol": "def doubleIt(num):\n\treturn num*2",
     "io": ["2;4"],
     "rubric": [2, 4]
-}]';
+}]';*/
 
 //make data list
 $data = json_decode($j);
 
-//array for the new question data
-$qs = [];
-
 //var to store final grade;
 $g = 0;
+$perf = 0;
+
+//array for the new question data
+$qs = [];
 
 foreach ($data as &$q) {
 
@@ -38,9 +41,10 @@ foreach ($data as &$q) {
     $points = [];
     foreach ($r as &$p){
         array_push($points, $p);
+        $perf = $perf + $p;
     }
     
-    //temporarily doing a dumb php string search while i build a python parse tree to do this work
+    //temporarily doing a dumb php string search / replace while i build a python parse tree to do this work
     $finalGrades = [];    
     
     //check function name
@@ -78,15 +82,25 @@ foreach ($data as &$q) {
         else{
           $finalGrades[$index] = $points[$index];
         }
-        $g = $g . $finalGrades[$index];
+        $g = $g + $finalGrades[$index];
         $index++;
     }
     
-    //formats json for backend
-    print_r($finalGrades);
-    echo $g;
+    //push to qs array
+    $finQuestion = [
+        'qid' => $qid,
+        'points' => $finalGrades,
+    ];
     
-    /*
-    {"points_possible":34, "points_given":24, "qids":[{"qid":"qid1", "points":"3,4,2"},{...}] }*/
-}  
+    array_push($qs,$finQuestion);
+} 
+
+//setup return json
+$results = [
+    'points_possible' => $perf,
+    'points_given' => $g,
+    'qids' => $qs,
+];
+
+echo json_encode($results);
 ?>
