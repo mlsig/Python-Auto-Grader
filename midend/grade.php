@@ -1,64 +1,106 @@
 <?php
-//get data from FE
-$e = $_POST['exID'];
-$s = $_POST['sID'];
+//get data from gc
+$j = $_POST['json'];
 
-//get question ID's from gc
-$url = 'https://web.njit.edu/~gc288/490/getExQuestions.php';
-$exam = [
-    'exID' => $e,
-    'sID' => $s,
-];
-$opts = [
-    CURLOPT_URL => $url,
-    CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => $exam,
-];
-$ch = curl_init();
-curl_setopt_array($ch,$opts);
-curl_exec($ch);
+/*
+$j = '[{
+    "qid": "qid1",
+    "title": "doubleIt",
+    "sol": "def doubleIt(num):\n\treturn num*2",
+    "io": ["2;4"],
+    "rubric": [2, 4]
+}]';*/
 
-//save array of questions (need: qid, title, user solution, I/O, rubric)
-//above will be whats returned in each item of the questions array, with an updated rubric array
-$questions = json_decode(file_get_contents('https://web.njit.edu/~gc288/490/getExQuestions'), true);
+//make data list
+$data = json_decode($j);
 
-//create array to save new question data
-foreach ($quesions as &$q) {
-    //get q info
-    $func = $q[1];
-    $sol = $q[2];
-    $out = $q[3];
-    $rubric = $q[4]
-    //rubric should be an array
-    foreach ($rubric as &$point) {
+//var to store final grade;
+$g = 0;
+$perf = 0;
+
+//array for the new question data
+$qs = [];
+
+foreach ($data as &$q) {
+
+    //get info
+    $qid = $q->qid;
+    $t = $q->title;
+    $s = $q->sol;
+    $io = $q->io;
+    $r = $q->rubric;
     
+    $test = [];
+    foreach ($io as &$dataset){
+        $io_arr = explode(";", $dataset); 
+        $in = $io_arr[0];
+        $out = $io_arr[1];
+        $test[$in] = $out;
     }
-    //do the grading
-    $command = escapeshellcmd("python3 grade.py " . $out . " " . $sol)
-    $output = shell_exec($command);
-    //create array for the new question data
-    //save the grade into some question object in an array
-    echo $output;
-}    
     
-//send final array to gc
-$url = 'https://web.njit.edu/~gc288/490/saveExam.php';
-$out = [
-    //exam id
-    //array of new quesions
-];
-$opts = [
-    CURLOPT_URL => $url,
-    CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => $out,
-];
-$ch = curl_init();
-curl_setopt_array($ch,$opts);
-curl_exec($ch);
-
+    $points = [];
+    foreach ($r as &$p){
+        array_push($points, $p);
+        $perf = $perf + $p;
+    }
     
-//output confirmation
-$output = json_decode(file_get_contents('https://web.njit.edu/~gc288/490/saveExam.php'), true);
+    //temporarily doing a dumb php string search / replace while i build a python parse tree to do this work
+    $finalGrades = [];    
+    
+    //check function name
+    $func = strstr($s, $t);
+    $pos = strpos($s, $t);
+    $fun = gettype($func);
+    
+    
+    if($fun == "string"){
+        if($pos == 4){
+            $finalGrades[0] = $points[0];
+        }
+    }else{
+        //find fucntion name
+        $fi = explode("(",$s);
+        $f = $fi[0];
+        $de = "def " . $t;
+        //fix their fucntion name
+        $s = str_replace($f,$de,$s);
+        $finalGrades[0] = ($points[0]/2);
+    }
+    $g = $g + $finalGrades[0];
 
+    //add and run each io calls
+    $index = 1; 
+    foreach ($test as $in => $out){
+        $call = "print(" . $t . "(" . $in . "))";
+        $code = $s . "\n{$call}";
+        $c = "echo \"{$code}\" | python -";
+        $output = shell_exec($c);
+        $o = trim(preg_replace('/\s+/', ' ', $output));
+        if($out != $o){
+          $finalGrades[$index] = 0;
+        }
+        else{
+          $finalGrades[$index] = $points[$index];
+        }
+        $g = $g + $finalGrades[$index];
+        $index++;
+    }
+    
+    //push to qs array
+    $finQuestion = [
+        'qid' => $qid,
+        'points' => $finalGrades,
+    ];
+    
+    array_push($qs,$finQuestion);
+} 
+
+//setup return json
+$results = [
+    'points_possible' => $perf,
+    'points_given' => $g,
+    'qids' => $qs,
+];
+
+echo json_encode($results);
 ?>
-
