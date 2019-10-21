@@ -4,9 +4,9 @@
 $j = '[{
     "qid": "qid1",
     "title": "doubleIt",
-    "sol": "print(2)",
-    "io": ["\"none\";2 "],
-    "rubric": [1, 4]
+    "sol": "def doubleit(num):\n\treturn num*2",
+    "io": ["2;4"],
+    "rubric": [2, 4]
 }]';
 
 //make data list
@@ -20,44 +20,73 @@ $g = 0;
 
 foreach ($data as &$q) {
 
-	//get info
-	$qid = $q->qid;
-	$t = $q->title;
-	$s = $q->sol;
-	$io = $q->io;
-	$r = $q->rubric;
-	
-	$test = [];
-	foreach ($io as &$dataset){
-        $io_arr = explode (";", $dataset); 
+    //get info
+    $qid = $q->qid;
+    $t = $q->title;
+    $s = $q->sol;
+    $io = $q->io;
+    $r = $q->rubric;
+    
+    $test = [];
+    foreach ($io as &$dataset){
+        $io_arr = explode(";", $dataset); 
         $in = $io_arr[0];
         $out = $io_arr[1];
         $test[$in] = $out;
-	}
-	
-	$points = [];
-	foreach ($r as &$p){
+    }
+    
+    $points = [];
+    foreach ($r as &$p){
         array_push($points, $p);
-	}
-	
-	//pass user's code to a file
-	$userProgram = fopen("sol.py", "w");
-	fwrite($userProgram, "#!/usr/bin/env python\n");
-	fwrite($userProgram, $s);
+    }
     
-    //setup file for execution
-    $c = "chmod +x sol.py";
-    $command = escapeshellcmd($c);
-    $output = shell_exec($command);
+    //temporarily doing a dumb php string search while i build a python parse tree to do this work
+    $finalGrades = [];    
     
-    //check code results
-	$c = "python3 sol.py";
-    $command = escapeshellcmd($c);
-	$output = shell_exec($command);
-	echo "bruh";
-    echo $output;
+    //check function name
+    $func = strstr($s, $t);
+    $pos = strpos($s, $t);
+    $fun = gettype($func);
     
-    fclose($userProgram);
+    
+    if($fun == "string"){
+        if($pos == 4){
+            $finalGrades[0] = $points[0];
+        }
+    }else{
+        //find fucntion name
+        $fi = explode("(",$s);
+        $f = $fi[0];
+        $de = "def " . $t;
+        //fix their fucntion name
+        $s = str_replace($f,$de,$s);
+        $finalGrades[0] = ($points[0]/2);
+    }
+    $g = $g + $finalGrades[0];
+
+    //add and run each io calls
+    $index = 1; 
+    foreach ($test as $in => $out){
+        $call = "print(" . $t . "(" . $in . "))";
+        $code = $s . "\n{$call}";
+        $c = "echo \"{$code}\" | python -";
+        $output = shell_exec($c);
+        $o = trim(preg_replace('/\s+/', ' ', $output));
+        if($out != $o){
+          $finalGrades[$index] = 0;
+        }
+        else{
+          $finalGrades[$index] = $points[$index];
+        }
+        $g = $g . $finalGrades[$index];
+        $index++;
+    }
+    
+    //formats json for backend
+    print_r($finalGrades);
+    echo $g;
+    
+    /*
+    {"points_possible":34, "points_given":24, "qids":[{"qid":"qid1", "points":"3,4,2"},{...}] }*/
 }  
 ?>
-

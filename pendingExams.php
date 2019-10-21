@@ -5,8 +5,8 @@ $a = [
     'ucid' => $s,
 ];
 
-//untaken
-$url = 'https://web.njit.edu/~gc288/490/examStudentUntaken.php';
+//pending
+$url = 'https://web.njit.edu/~gc288/490/examStudentUngraded.php';
 $opts = [
     CURLOPT_URL => $url,
     CURLOPT_POST => true,
@@ -15,7 +15,6 @@ $opts = [
 $ch = curl_init();
 curl_setopt_array($ch,$opts);
 curl_exec($ch);
-
 
 ?>
 
