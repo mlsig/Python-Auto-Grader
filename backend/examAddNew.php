@@ -8,7 +8,7 @@ Author: Giancarlo Calle
 
 //credentials: (eid, qids)
 $title = $_POST["title"];
-$qids = $_POST["qids"]; //of the form: "qid1,qid2"
+$qids = $_POST["qIDs"]; //of the form: "qid1,qid2"
 $points = $_POST["points"]; //of the form: "4,2;2,3"
 
 //verifies connection to database
@@ -23,24 +23,31 @@ if ($connection->connect_error){
 
 
 //generates unique exam identifier
-$query = "SELECT eid FROM EXAMS WHERE eid = (SELECT MAX(eid) FROM EXAMS);";
+$query = "SELECT eid FROM EXAMS";
 $queryResult = $connection->query($query); //runs query
-if($queryResult -> num_rows == 0){ //checks if table is empty
+$max = 0;
+if($queryResult->num_rows == 0){
   $eid = "eid0";
 }
 else{
-  $maxeid = mysqli_fetch_assoc($queryResult)["eid"];
-  $numString = explode("d", $maxeid)[1]; //grabs the number from the max eid
-  $num = intval($numString) + 1;
-  $eid = "eid{$num}";
+  while($row = mysqli_fetch_assoc($queryResult)){
+    $eidSample = $row["eid"];
+    $num = intval(explode("d", $eidSample)[1]); //grabs number from each qid
+    if($num > $max){
+      $max = $num;
+    }
+  }
+  $max++;
+  $eid = "eid{$max}";
 }
+
 
 //inserts into the EXAM table
 $query = "INSERT INTO EXAMS (eid, etitle) VALUES (\"{$eid}\", \"{$title}\")";
 $queryResult = $connection->query($query);
 
 
-//parses $qids for qid and points. Of the form "qid0:[8,4];qid1:[7,4]"
+//parses $qids for qid and points.
 $qidList = explode(",", $qids);
 $pointList = explode(";", $points);
 for ($i = 0; $i < count($qidList); $i++){
@@ -51,14 +58,16 @@ for ($i = 0; $i < count($qidList); $i++){
 }
 
 //inserts into EXAM_STATUS table to check status of each student for each exam
-$q = "SELECT ucid FROM VALIDATION WHERE level = \"s\"";
+$q = "SELECT ucid FROM VALIDATION WHERE level=\"s\"";
 $qResult = $connection->query($q);
+
 while($ucid = mysqli_fetch_assoc($qResult)["ucid"]){
+
   $q = "INSERT INTO EXAM_STATUS (eid, ucid, status) VALUES (\"{$eid}\", \"{$ucid}\", \"No Submission\")";
-  $qResult = $connection->query($q);
+  echo $q;
+  $r = $connection->query($q);
 }
 
-//echos back to confirm
-echo "{ \"eid\" : \"{$eid}\", \"title\" : \"{$title}\" }";
+
 
 ?>

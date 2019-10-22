@@ -7,10 +7,9 @@ Author: Giancarlo Calle
 
 //credentials:
 $ucid = $_POST["ucid"];
-$ucid = "gc288";
 
 if(empty($ucid)){
-  exit("No POST Info");
+  exit("NO UCID INPUT");
 }
 
 //verifies connection to database

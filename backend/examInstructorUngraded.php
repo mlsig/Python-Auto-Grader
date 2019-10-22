@@ -1,7 +1,7 @@
 <?php
 
 /*
-Backend to send all question from DB to frontend.
+Echoes all exams that have been auto-graded but need a final grade.
 Version: beta
 Author: Giancarlo Calle
 */
@@ -15,25 +15,23 @@ if ($connection->connect_error){
   die("Could not connect to SQL database. Error: " . $connection -> connect_error);
 }
 
-$query = "SELECT * FROM QUESTIONS;";
+$json = "["; //of the form: [{"eid":"eid1", "etitle":"Sample", "ucid":"gc288", "autoGrade": "49/50"}, {...}, ...]
+
+$query = "SELECT S.eid, S.ucid, S.autoGrade, E.etitle FROM EXAM_STATUS S, EXAMS E WHERE E.eid = S.eid AND S.status = \"Auto-Graded\"";
 $queryResult = $connection->query($query);
 
-$json = "[";
+if($queryResult->num_rows == 0){
+  exit("[]");
+}
 while($row = mysqli_fetch_assoc($queryResult)){
-  $qid = $row["qid"];
-  $title = $row["qtitle"];
-  $prompt = $row["prompt"];
-  $diff = $row["difficulty"];
-  $topic = $row["topic"];
+  $eid = $row["eid"];
+  $ucid = $row["ucid"];
+  $autoGrade = $row["autoGrade"];
+  $etitle = $row["etitle"];
 
-  $q = "SELECT * FROM IO WHERE qid = \"{$qid}\"";
-  $qResult = $connection->query($q);
-  $ioNum = $qResult->num_rows + 1;
-
-  $json = $json . "{\"qid\":\"{$qid}\", \"title\":\"{$title}\", \"prompt\":\"{$prompt}\", \"difficulty\":\"{$diff}\", \"topic\":\"{$topic}\", \"#ios\":\"{$ioNum}\"},";
+  $json = $json . "{\"eid\":\"{$eid}\", \"etitle\":\"{$etitle}\", \"ucid\":\"{$ucid}\", \"autoGrade\":\"{$autoGrade}\"},";
 }
 $json = substr($json, 0, -1); //removes last comma
 $json = $json . " ]";
-
 echo $json;
 ?>

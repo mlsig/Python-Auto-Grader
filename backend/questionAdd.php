@@ -11,7 +11,20 @@ $title = $_POST["title"];
 $prompt = $_POST["prompt"]; //ex: "print 'A+' if input is '100'
 $difficulty = $_POST["difficulty"]; //ex: "hard"
 $topic = $_POST["topic"]; //ex: "loops"
-$sampleIO = $_POST["sampleIO"]; //of form in1,out1;in2,out2
+
+//all inputs and outputs
+$in1 = $_POST["in1"];
+$out1 = $_POST["out1"];
+$in2 = $_POST["in2"];
+$out2 = $_POST["out2"];
+$in3 = $_POST["in3"];
+$out3 = $_POST["out3"];
+$in4 = $_POST["in4"];
+$out4 = $_POST["out4"];
+$in5 = $_POST["in5"];
+$out5 = $_POST["out5"];
+
+echo $title . $prompt . $difficulty . $topic . $in1 . $in2 . $in3 . $in4 . $in5 . $out1 . $out2 . $out3 . $out4 . $out5;
 
 //verifies connection to database
 $serverName = "sql.njit.edu"; //server name (mysql)
@@ -23,33 +36,43 @@ if ($connection->connect_error){
   echo "Could not connect to SQL database. Error: " . $connection -> connect_error;
 }
 
-//generates unique question identifier
-$query = "SELECT qid FROM QUESTIONS WHERE qid = (SELECT MAX(qid) FROM QUESTIONS);";
+//generates unique exam identifier
+$query = "SELECT qid FROM QUESTIONS";
+
 $queryResult = $connection->query($query); //runs query
-if($queryResult -> num_rows == 0){ //checks if table is empty
+$max = 0;
+if($queryResult->num_rows == 0){
   $qid = "qid0";
 }
 else{
-  $maxqid = mysqli_fetch_assoc($queryResult)["qid"];
-  $numString = explode("d", $maxqid)[1]; //grabs the number from the max qid
-  $num = intval($numString) + 1;
-  $qid = "qid{$num}";
+  while($row = mysqli_fetch_assoc($queryResult)){
+    $qidSample = $row["qid"];
+    $num = intval(explode("d", $qidSample)[1]); //grabs number from each qid
+    if($num > $max){
+      $max = $num;
+    }
+  }
+  $max++;
+  $qid = "qid{$max}";
 }
 
 //inserts into the QUESTIONS table
 $query = "INSERT INTO QUESTIONS (qid, qtitle, prompt, difficulty, topic) VALUES (\"{$qid}\", \"{$title}\", \"{$prompt}\", \"{$difficulty}\", \"{$topic}\");";
 $queryResult = $connection->query($query); //runs query
 
-//separates input and output and inserts into IO table
-$split = explode(";", $sampleIO);
-foreach ($split as &$val){
-  $io = explode(",", $val);
-  $in = $io[0];
-  $out = $io[1];
-  $query = "INSERT INTO IO (qid, input, output) VALUES (\"{$qid}\", \"{$in}\", \"{$out}\");";
-  $queryResult = $connection->query($query); //runs query
-}
+//inserts into IO table
+$query = "INSERT INTO IO (qid, input, output) VALUES (\"{$qid}\", \"{$in1}\", \"{$out1}\")";
+$queryResult = $connection->query($query); //runs query
+$query = "INSERT INTO IO (qid, input, output) VALUES (\"{$qid}\", \"{$in2}\", \"{$out2}\")";
+$queryResult = $connection->query($query); //runs query
+$query = "INSERT INTO IO (qid, input, output) VALUES (\"{$qid}\", \"{$in3}\", \"{$out3}\")";
+$queryResult = $connection->query($query); //runs query
+$query = "INSERT INTO IO (qid, input, output) VALUES (\"{$qid}\", \"{$in4}\", \"{$out4}\")";
+$queryResult = $connection->query($query); //runs query
+$query = "INSERT INTO IO (qid, input, output) VALUES (\"{$qid}\", \"{$in5}\", \"{$out5}\")";
+$queryResult = $connection->query($query); //runs query
 
-echo "{ \"qid\" : \"{$qid}\", \"title\" : \"{$title}\", \"prompt\" : \"{$prompt}\", \"difficulty\" : \"{$difficulty}\", \"topic\" : \"{$topic}\", \"sampleIO\" : \"{$sampleIO}\" }";
+$query = "DELETE FROM IO WHERE input=\"\"";
+$queryResult = $connection->query($query);
 
 ?>

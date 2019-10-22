@@ -23,6 +23,8 @@ if(empty($u) || empty($p)){
   exit("No Post Info");
 }
 
+
+
 $hashed = hash('sha512', $p);
 
 /*connects to the table that stores usernames and passwords*/

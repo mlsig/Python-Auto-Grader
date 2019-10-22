@@ -26,7 +26,7 @@ $etitle = mysqli_fetch_assoc($qResult)["etitle"];
 $json = "{\"eid\":\"{$eid}\", \"etitle\":\"{$etitle}\", \"qids\":[";
 
 //grabs questions and adds to json
-$q = "SELECT Q.qid, Q.qtitle, Q.prompt, Q.difficulty, Q.topic FROM EXAM_QUESTIONS E, QUESTIONS Q WHERE E.qid = Q.qid AND E.eid = \"{$eid}\"";
+$q = "SELECT Q.qid, Q.qtitle, Q.prompt FROM EXAM_QUESTIONS E, QUESTIONS Q WHERE E.qid = Q.qid AND E.eid = \"{$eid}\"";
 $qResult = $c->query($q);
 
 while($row = mysqli_fetch_assoc($qResult)){
