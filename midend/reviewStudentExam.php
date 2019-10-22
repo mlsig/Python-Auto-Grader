@@ -1,13 +1,13 @@
 <?php
 //get data from FE
 $u = $_POST['ucid'];
-$e = $_POST['examid'];
+$e = $_POST['eid'];
 
 //send to BE
 $url = 'https://web.njit.edu/~gc288/490/reviewExamInstructor.php';
 $q = [
     'ucid' => $u,
-    'examid' => $e;
+    'eid' => $e
 ];
 $opts = [
     CURLOPT_URL => $url,
