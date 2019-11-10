@@ -7,7 +7,7 @@ $j = '[{
     "qid": "qid1",
     "title": "doubleIt",
     "sol": "def doubleIt(num):\n\treturn num*2",
-    "io": ["2;4"],
+    "io": [{"in":"2", "out":"4"}],
     "rubric": 10
 }]';*/
 
@@ -38,14 +38,6 @@ foreach ($data as &$q) {
     //track perfect score
     $perf = $perf + $r;
     
-    //set up io 
-    $test = [];
-    foreach ($io as &$dataset){
-        $io_arr = explode(";", $dataset); 
-        $in = $io_arr[0];
-        $out = $io_arr[1];
-        $test[$in] = $out;
-    }
     
     //array of comments
     $c = [];
@@ -96,7 +88,9 @@ foreach ($data as &$q) {
 
     //add and run each io calls
     $index = 1; 
-    foreach ($test as $in => $out){
+    foreach ($io as &$tests){
+        $in = $tests["in"];
+        $out = $tests["out"];
         $call = "print(" . $t . "(" . $in . "))";
         $code = $s . "\n{$call}";
         $c = "echo \"{$code}\" | python -";
@@ -117,8 +111,8 @@ foreach ($data as &$q) {
     //push to qs array
     $finQuestion = [
         'qid' => $qid,
-        'points' => $r,
-        'comments' => $c;
+        'autoPoints"' => $r,
+        'deductions' => $c;
     ];
     
     array_push($qs,$finQuestion);
@@ -126,9 +120,9 @@ foreach ($data as &$q) {
 
 //setup return json
 $results = [
+    'qids' => $qs,
     'points_possible' => $perf,
     'total_grade' => $g,
-    'qids' => $qs,
 ];
 
 echo json_encode($results);
