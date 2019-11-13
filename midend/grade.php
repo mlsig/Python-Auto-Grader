@@ -1,15 +1,29 @@
 <?php
 //get data from gc
-$j = $_POST['json'];
+//$j = $_POST['json'];
 
-/*
 $j = '[{
+    "qid": "qid0",
+    "title": "returnDouble",
+    "sol": "def returnDouble(num):\n\treturn num*2",
+    "io": [{
+        "in": "2",
+        "out": "4"
+    }, {
+        "in": "3",
+        "out": "6"
+    }],
+    "rubric": "10"
+}, {
     "qid": "qid1",
-    "title": "doubleIt",
-    "sol": "def doubleIt(num):\n\treturn num*2",
-    "io": [{"in":"2", "out":"4"}],
-    "rubric": 10
-}]';*/
+    "title": "returnHalf",
+    "sol": "def returnHalf(num):\n\treturn num*.5",
+    "io": [{
+        "in": "4",
+        "out": "2"
+    }],
+    "rubric": "15"
+}]';
 
 //make data list
 $data = json_decode($j);
@@ -18,7 +32,7 @@ $data = json_decode($j);
 $perf = 0;
 
 //track exam score
-$g = 0
+$g = 0;
 
 //array for the new question data
 $qs = [];
@@ -28,8 +42,6 @@ foreach ($data as &$q) {
     //get info
     $qid = $q->qid;
     $t = $q->title;
-    //saving len of title for later
-    $tLen = strlen($t);
     $s = $q->sol;
     $io = $q->io;
     //starting perfect, subtracting as we go
@@ -38,7 +50,6 @@ foreach ($data as &$q) {
     //track perfect score
     $perf = $perf + $r;
     
-    
     //array of comments
     $c = [];
     
@@ -46,12 +57,7 @@ foreach ($data as &$q) {
     $func = strstr($s, $t);
     $pos = strpos($s, $t);
     $fun = gettype($func);
-    
-    if($fun == "string"){
-        if($pos == 4){
-            continue;
-        }
-    }else{
+    if($fun != "string" || $pos != 4){
         //find fucntion name
         $fi = explode("(",$s);
         $f = $fi[0];
@@ -62,18 +68,14 @@ foreach ($data as &$q) {
         array_push($c,"Minus 5 for incorrect function name");
     }
     
-    
     //check for colon
     $col = strstr($s, ":");
     $pos = strpos($s, ":");
     $typ = gettype($col);
+    $fi = explode(")",$s);
+    $f = strlen($fi[0]) + 1;
     
-    if($typ == "string"){
-        //4 plus length of the name
-        if($pos == 4 + $tLen){
-            continue;
-        }
-    }else{
+    if($typ != "string" || $pos != $f){ //NEED DO
         //add colon at pos
         /*
         $fi = explode("(",$s);
@@ -87,10 +89,10 @@ foreach ($data as &$q) {
     }
 
     //add and run each io calls
-    $index = 1; 
-    foreach ($io as &$tests){
-        $in = $tests["in"];
-        $out = $tests["out"];
+    $index = 0; 
+    foreach ($i as &$tests){
+        $in = $i["in"];
+        $out = $i["out"];
         $call = "print(" . $t . "(" . $in . "))";
         $code = $s . "\n{$call}";
         $c = "echo \"{$code}\" | python -";
@@ -99,7 +101,7 @@ foreach ($data as &$q) {
         if($out != $o){
             $r = $r - 10;
             if($r < 1){
-                $r = 0
+                $r = 0;
             }
             array_push($c,"Minus 10 for missing for incorrect output");
         }
@@ -111,8 +113,8 @@ foreach ($data as &$q) {
     //push to qs array
     $finQuestion = [
         'qid' => $qid,
-        'autoPoints"' => $r,
-        'deductions' => $c;
+        'deductions' => $c,
+        'autoPoints' => $r,
     ];
     
     array_push($qs,$finQuestion);
@@ -120,9 +122,9 @@ foreach ($data as &$q) {
 
 //setup return json
 $results = [
-    'qids' => $qs,
     'points_possible' => $perf,
     'total_grade' => $g,
+    'qids' => $qs,
 ];
 
 echo json_encode($results);
