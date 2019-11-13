@@ -1,6 +1,7 @@
 <?php
 //get data from gc
 $j = $_POST['json'];
+
 //make data list
 $data = json_decode($j);
 //track what a perfct score is
@@ -45,13 +46,11 @@ foreach ($data as &$q) {
     $fi = explode(")",$s);
     $f = strlen($fi[0]) + 1;
     if($typ != "string" && $pos != $f){ //NEED DO
-        /*
         $ree = $fi[0];
-        echo $ree;
-        $de = "def " . $t;
-        //fix their fucntion name
-        $s = str_replace($f,$de,$s);
-        */
+        $de = $ree . "):";
+        //fix the colon
+        $s = str_replace($ree,$de,$s);
+        $s = str_replace(":)",":",$s);
         $r = $r - 3;
         array_push($c,"Minus 3 for missing colon");
     }
@@ -59,8 +58,6 @@ foreach ($data as &$q) {
     //check hardcode
     
     //add and run each io calls
-    $index = 0; 
-    //why loop no work?
     foreach ($io as &$i){
         $in = $i->in;
         $out = $i->out;
@@ -76,7 +73,6 @@ foreach ($data as &$q) {
             }
             array_push($c,"Minus 10 for missing for incorrect output");
         }
-        $index++;
     }
     
     //grade update
