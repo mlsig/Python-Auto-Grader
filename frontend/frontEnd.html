@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+    <title>
+        Our Sign In Test
+    </title>
+    <style>
+    .header
+    {
+		padding: 1px;
+		text-align: center;
+		background: #cb37d0;
+		color: white;
+		text-align: center;
+    }
+    </style>
+</head>
+<div class='header'>
+    <h1>
+        WELCOME
+    </h1>
+    <h2>
+        Please enter your UCID and Password
+    </h2>
+</div>
+<body class = "loginForm">
+<div class ="dataContent">
+
+   <form class ="login-form" id="userform" style="text-align:center">
+   <br><br>
+    <label id="UCLable" for='UCIDField'>Enter your UCID:</label>
+    <input id="ucid" name="ucid" type="text">
+    <br><br>
+    <label id='passLable' for='passField'>Enter your password:      
+    </label>
+    <input id="pass" name="pass" type="password">
+    <br><br>
+    <input type="button" id="loginButton" value ="Login" onclick="checkInfo(this.form)"/>
+	</form>
+ </div>
+ </body>
+ <p id="confirmhere"></p>
+</html>
+<script src="/~aa2296/checkInfo.js"></script>
