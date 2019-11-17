@@ -6,7 +6,7 @@ $a = [
 ];
 
 //untaken
-$url = 'https://web.njit.edu/~gc288/490/getExamGraded.php';
+$url = 'https://web.njit.edu/~gc288/490/getQuestionsKeyword.php';
 $opts = [
     CURLOPT_URL => $url,
     CURLOPT_POST => true,
