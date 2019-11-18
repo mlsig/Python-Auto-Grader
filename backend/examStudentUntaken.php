@@ -1,37 +1,34 @@
 <?php
+
 /*
-Backend to echo untaken, pending, and graded exams for a specific student.
-Version: beta
+Echoes untaken exams for a specific student.
+Version: release candidate
 Author: Giancarlo Calle
 */
-
-//credentials:
-$ucid = $_POST["ucid"];
-
-if(empty($ucid)){
-  exit("NO UCID INPUT");
-}
 
 //verifies connection to database
 $serverName = "sql.njit.edu"; //server name (mysql)
 $userName = "gc288"; //giancarlo's ucid
 $serverPassword = "camilla56"; //super secret password, avert your eyes!
 $dbName = "gc288";
-$c = new mysqli($serverName, $userName, $serverPassword, $dbName); //connects to db
-if ($c->connect_error){
+$connection = new mysqli($serverName, $userName, $serverPassword, $dbName); //connects to db
+if ($connection->connect_error){
   echo "Could not connect to SQL database. Error: " . $connection -> connect_error;
 }
 
-//grabs data and inserts into json
-$q = "SELECT S.eid, E.etitle, S.status FROM EXAM_STATUS S, EXAMS E WHERE S.eid = E.eid AND ucid = \"{$ucid}\"";
-$qResult = $c->query($q);
+//credentials (ucid)
+$ucid = $_POST["ucid"];
 
-if($qResult->num_rows === 0){
-  exit("[]");
+//grabs data and inserts into json
+$query = "SELECT S.eid, E.etitle, S.status FROM EXAM_STATUS S, EXAMS E WHERE S.eid = E.eid AND ucid = \"{$ucid}\"";
+$queryResult = $connection->query($query);
+if($queryResult->num_rows === 0){
+  exit("[]"); //echoes empty list if there are no exams to take for the student
 }
 
+//creates list of untaken exams to echo for frontend
 $json = "[";
-while($row = mysqli_fetch_assoc($qResult)){
+while($row = mysqli_fetch_assoc($queryResult)){
   $eid = $row["eid"];
   $status = $row["status"];
   $title = $row["etitle"];
@@ -40,10 +37,8 @@ while($row = mysqli_fetch_assoc($qResult)){
     $json = $json . "{ \"eid\":\"{$eid}\", \"title\":\"{$title}\" },";
   }
 }
-if($json != "["){
-  $json = substr($json, 0, -1); //removes last comma
-}
+$json = substr($json, 0, -1); //removes last comma
 $json = $json . "]";
-
 echo $json;
-?>
+
+//end of file

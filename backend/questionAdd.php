@@ -1,8 +1,8 @@
 <?php
 
 /*
-Backend to add a question to the DB.
-Version: beta
+Adds a question to the DB.
+Version: release candidate
 Author: Giancarlo Calle
 */
 
@@ -38,7 +38,6 @@ if ($connection->connect_error){
 
 //generates unique exam identifier
 $query = "SELECT qid FROM QUESTIONS";
-
 $queryResult = $connection->query($query); //runs query
 $max = 0;
 if($queryResult->num_rows == 0){
@@ -75,4 +74,5 @@ $queryResult = $connection->query($query); //runs query
 $query = "DELETE FROM IO WHERE input=\"\"";
 $queryResult = $connection->query($query);
 
-?>
+mysqli_close($connection);
+//end of file
