@@ -1,3 +1,6 @@
 #file used to test stuff
 backend/test.txt
 backend/jsonSample.json
+test.txt
+messageFromGC.txt
+midend/sol.py

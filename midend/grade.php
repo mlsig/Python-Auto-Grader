@@ -2,94 +2,87 @@
 //get data from gc
 $j = $_POST['json'];
 
-/*
-$j = '[{
-    "qid": "qid1",
-    "title": "doubleIt",
-    "sol": "def doubleIt(num):\n\treturn num*2",
-    "io": ["2;4"],
-    "rubric": [2, 4]
-}]';*/
-
 //make data list
 $data = json_decode($j);
-
-//var to store final grade;
-$g = 0;
+//track what a perfct score is
 $perf = 0;
-
+//track exam score
+$g = 0;
 //array for the new question data
 $qs = [];
 
 foreach ($data as &$q) {
-
     //get info
     $qid = $q->qid;
     $t = $q->title;
     $s = $q->sol;
     $io = $q->io;
+    //starting perfect, subtracting as we go
     $r = $q->rubric;
-    
-    $test = [];
-    foreach ($io as &$dataset){
-        $io_arr = explode(";", $dataset); 
-        $in = $io_arr[0];
-        $out = $io_arr[1];
-        $test[$in] = $out;
-    }
-    
-    $points = [];
-    foreach ($r as &$p){
-        array_push($points, $p);
-        $perf = $perf + $p;
-    }
-    
-    //temporarily doing a dumb php string search / replace while i build a python parse tree to do this work
-    $finalGrades = [];    
+    //track perfect score
+    $perf = $perf + $r;
+    //array of comments
+    $c = [];
     
     //check function name
     $func = strstr($s, $t);
     $pos = strpos($s, $t);
     $fun = gettype($func);
-    
-    
-    if($fun == "string"){
-        if($pos == 4){
-            $finalGrades[0] = $points[0];
-        }
-    }else{
+    if($fun != "string" && $pos != 4){
         //find fucntion name
         $fi = explode("(",$s);
         $f = $fi[0];
         $de = "def " . $t;
         //fix their fucntion name
         $s = str_replace($f,$de,$s);
-        $finalGrades[0] = ($points[0]/2);
+        $r = $r - 5;
+        array_push($c,"Minus 5 for incorrect function name");
     }
-    $g = $g + $finalGrades[0];
-
+    
+    //check for colon
+    $col = strstr($s, ":");
+    $pos = strpos($s, ":");
+    $typ = gettype($col);
+    $fi = explode(")",$s);
+    $f = strlen($fi[0]) + 1;
+    if($typ != "string" && $pos != $f){ //NEED DO
+        $ree = $fi[0];
+        $de = $ree . "):";
+        //fix the colon
+        $s = str_replace($ree,$de,$s);
+        $s = str_replace(":)",":",$s);
+        $r = $r - 3;
+        array_push($c,"Minus 3 for missing colon");
+    }
+    
+    //check hardcode
+    
     //add and run each io calls
-    $index = 1; 
-    foreach ($test as $in => $out){
+    foreach ($io as &$i){
+        $in = $i->in;
+        $out = $i->out;
         $call = "print(" . $t . "(" . $in . "))";
         $code = $s . "\n{$call}";
-        $c = "echo \"{$code}\" | python -";
-        $output = shell_exec($c);
+        $co = "echo \"{$code}\" | python -";
+        $output = shell_exec($co);
         $o = trim(preg_replace('/\s+/', ' ', $output));
         if($out != $o){
-          $finalGrades[$index] = 0;
+            $r = $r - 10;
+            if($r < 1){
+                $r = 0;
+            }
+            array_push($c,"Minus 10 for missing for incorrect output");
         }
-        else{
-          $finalGrades[$index] = $points[$index];
-        }
-        $g = $g + $finalGrades[$index];
-        $index++;
     }
+    
+    //grade update
+    $g = $g + $r;
     
     //push to qs array
     $finQuestion = [
         'qid' => $qid,
-        'points' => $finalGrades,
+        'deductions' => $c,
+        'autoPoints' => $r,
     ];
     
     array_push($qs,$finQuestion);
@@ -98,7 +91,7 @@ foreach ($data as &$q) {
 //setup return json
 $results = [
     'points_possible' => $perf,
-    'points_given' => $g,
+    'total_grade' => $g,
     'qids' => $qs,
 ];
 
