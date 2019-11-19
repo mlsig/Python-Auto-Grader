@@ -58,6 +58,7 @@ foreach ($data as &$q) {
     //check hardcode
     
     //add and run each io calls
+    $num = 1;
     foreach ($io as &$i){
         $in = $i->in;
         $out = $i->out;
@@ -71,8 +72,12 @@ foreach ($data as &$q) {
             if($r < 1){
                 $r = 0;
             }
-            array_push($c,"Minus 10 for missing for incorrect output");
+            array_push($c,"Minus 10 for missing for " . $num . " incorrect output");
+            $num = $num + 1;
         }
+    }
+    if(count($c) == 0){
+        array_push($c,"No deductions");
     }
     
     //grade update
