@@ -2,7 +2,7 @@
 
 /*
 Backend to log in user to student or instructor portal.
-Version: beta
+Version: release candidate
 Author: Giancarlo Calle
 */
 
@@ -15,21 +15,16 @@ if ($connection -> connect_error){
   die("Could not connect to SQL database. Error: " . $connection -> connect_error);
 }
 
-//collects credentials
+//collects credentials (username and password)
 $u = $_POST["u"];
 $p = $_POST["p"];
 
-if(empty($u) || empty($p)){
-  exit("No Post Info");
-}
-
-
-
+//hashes password for security
 $hashed = hash('sha512', $p);
 
-/*connects to the table that stores usernames and passwords*/
+//connects to the table that stores usernames and passwords
 $verifyInfo = "SELECT ucid, password FROM VALIDATION WHERE ucid=\"" . $u . "\" AND password=\"" . $hashed . "\"";
-$queryResult = $connection->query($verifyInfo); //runs query
+$queryResult = $connection->query($verifyInfo);
 
 if ($queryResult -> num_rows == 0){
   echo "{ \"level\" : \"n\" }";
@@ -37,12 +32,10 @@ if ($queryResult -> num_rows == 0){
 else{
   $verifyLevel = "SELECT level FROM VALIDATION WHERE ucid = \"" . $u . "\"";
   $queryResult = $connection->query($verifyLevel);
-
   $level = mysqli_fetch_assoc($queryResult)["level"]; //grabs "i" or "s"
 
   echo "{ \"level\" : \"" . $level . "\" }";
 }
 
 mysqli_close($connection);
-
-?>
+//end of file

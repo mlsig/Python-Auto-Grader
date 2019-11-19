@@ -1,80 +1,77 @@
 <?php
 
 /*
-Backend to store student solution in DB.
-Version: beta
+Recieves exam submission from student and sends it to auto-grader and stores the grade and submission in DB
+Version: release candidate
 Author: Giancarlo Calle
 */
-
-//credentials: (codeJSON)
-$codeJSON = $_POST["codeJSON"]; //of the form: [{"qid":"qid0", "code":"example code"}, {"qid":"qid1", "code":"sample"}]
-
-//$codeJSON = "{\"eid\": \"eid0\", \"ucid\":\"gc288\", \"solutions\":[{\"qid\":\"qid0\", \"sol\":\"def returnDouble(num):\n\treturn num*2\"},{\"qid\":\"qid1\", \"sol\":\"def returnHalf(num):\\n\\treturn num*.5\"}] }";
-$codeJSON = strtr($codeJSON, array("\n" => "\\n",  "\t" => "\\t"));
-$decoded = json_decode($codeJSON);
-$eid = $decoded->eid;
-$ucid = $decoded->ucid;
 
 //verifies connection to database
 $serverName = "sql.njit.edu"; //server name (mysql)
 $userName = "gc288"; //giancarlo's ucid
 $serverPassword = "camilla56"; //super secret password, avert your eyes!
 $dbName = "gc288";
-$c = new mysqli($serverName, $userName, $serverPassword, $dbName); //connects to db
-if ($c->connect_error){
+$connection = new mysqli($serverName, $userName, $serverPassword, $dbName); //connects to db
+if ($connection->connect_error){
   echo "Could not connect to SQL database. Error: " . $connection -> connect_error;
 }
 
-//Inserts code from codeJSON into EXAM_POINTS
+//credentials: (codeJSON)
+$codeJSON = $_POST["codeJSON"];
+$codeJSON = "{\"eid\": \"eid0\", \"ucid\":\"gc288\", \"solutions\":[{\"qid\":\"qid0\", \"sol\":\"def returnDouble(num)\n\treturn 4\"},{\"qid\":\"qid1\", \"sol\":\"def returnHalf(num):\\n\\treturn num*.5\"}] }";
+$codeJSON = strtr($codeJSON, array("\n" => "\\n",  "\t" => "\\t")); //ensures correct json format by removing newlines and tabs
+$decoded = json_decode($codeJSON);
+$eid = $decoded->eid;
+$ucid = $decoded->ucid;
+
+//inserts inserts code into DB and adds exam info to json for grader
 $array = $decoded->solutions;
 $json = "[";
 foreach($array as &$question){
   $qid = $question->qid;
   $sol = $question->sol;
-
+  $sol = strtr($sol, array("\n" => "\\n",  "\t" => "\\t")); //replaces newline with \n, tab with \t
 
   //inserts code into db
-  $q = "INSERT INTO EXAM_POINTS (eid, ucid, qid, sol) VALUES (\"{$eid}\", \"{$ucid}\", \"{$qid}\", \"{$sol}\")";
-  $qResult = $c->query($q);
-
-  $sol = strtr($sol, array("\n" => "\\n",  "\t" => "\\t")); //replaces newline with \n
+  $query = "INSERT INTO EXAM_POINTS (eid, ucid, qid, sol) VALUES (\"{$eid}\", \"{$ucid}\", \"{$qid}\", \"{$sol}\")";
+  $qResult = $connection->query($query);
 
   //grabs title
-  $q = "SELECT qtitle FROM QUESTIONS WHERE qid = \"{$qid}\"";
-  $qResult = $c->query($q);
-  $title = mysqli_fetch_assoc($qResult)["qtitle"];
+  $query2 = "SELECT qtitle FROM QUESTIONS WHERE qid = \"{$qid}\"";
+  $qResult2 = $connection->query($query2);
+  $title = mysqli_fetch_assoc($qResult2)["qtitle"];
 
   //grabs input and output and stores in array
   $io = "[";
-  $q = "SELECT input, output FROM IO WHERE qid = \"{$qid}\"";
-  $qResult = $c->query($q);
-  while($row = mysqli_fetch_assoc($qResult)){
+  $query3 = "SELECT input, output FROM IO WHERE qid = \"{$qid}\"";
+  $qResult3 = $connection->query($query3);
+  while($row = mysqli_fetch_assoc($qResult3)){
     $in = $row["input"];
     $out = $row["output"];
-    $io = $io . "\"{$in};{$out}\",";
+    $io = $io . "{\"in\":\"{$in}\",\"out\":\"{$out}\"},";
   }
   $io = substr($io, 0, -1); //removes last comma
   $io = $io . "]";
 
   //grabs point values for question
-  $q = "SELECT points FROM EXAM_QUESTIONS WHERE eid = \"{$eid}\" AND qid = \"{$qid}\"";
-  $qResult = $c->query($q);
-  $rubric = "[" . mysqli_fetch_assoc($qResult)["points"] . "]";
+  $query4 = "SELECT points FROM EXAM_QUESTIONS WHERE eid = \"{$eid}\" AND qid = \"{$qid}\"";
+  $qResult4 = $connection->query($query4);
+  $rubric = "\"" . mysqli_fetch_assoc($qResult4)["points"] . "\"";
 
   //adds code to JSON to send to midend for auto grading
   $json = $json . "{\"qid\":\"{$qid}\", \"title\":\"{$title}\", \"sol\":\"{$sol}\", \"io\":{$io}, \"rubric\":{$rubric}},";
-
 }
 $json = substr($json, 0, -1); //removes last comma
 $json = $json . "]";
 
-//updates status of exam so student does not take it again
-$q = "UPDATE EXAM_STATUS SET status=\"Auto-Graded\" WHERE eid=\"{$eid}\" AND ucid=\"{$ucid}\"";
-$r = $c->query($q);
+//updates status of exam so student cannot take it again
+$query5 = "UPDATE EXAM_STATUS SET status=\"Auto-Graded\" WHERE eid=\"{$eid}\" AND ucid=\"{$ucid}\"";
+$qResult5 = $connection->query($query5);
 
+//echo $json;
 
 //sends json to midend to grade
-$url = 'https://web.njit.edu/~ms2437/cs490/beta/grade.php';
+$url = 'https://web.njit.edu/~ms2437/cs490/rc/grade.php';
 $creds = ['json' => $json];
 $opts = [
   CURLOPT_URL => $url,
@@ -84,33 +81,33 @@ $opts = [
 ];
 $ch = curl_init();
 curl_setopt_array($ch,$opts);
-$autoPoints = curl_exec($ch); //of the form: {"points_possible":34, "points_given":24, "qids":[{"qid":"qid1", "points":[3,4,2]},{...}] }
-
+$autoPoints = curl_exec($ch);
 
 //calculates grade given by auto grader
 $j = json_decode($autoPoints);
-$pointsGiven = $j->points_given;
+$totalGrade = $j->total_grade;
 $pointsPossible = $j->points_possible;
-$autoGrade = "{$pointsGiven}/{$pointsPossible}";
-echo $autoGrade;
-$q = "UPDATE EXAM_STATUS SET autoGrade=\"{$autoGrade}\" WHERE eid=\"{$eid}\" AND ucid=\"{$ucid}\"";
-$r = $c->query($q);
+
+$autoGrade = "{$totalGrade}/{$pointsPossible}";
+
+$query6 = "UPDATE EXAM_STATUS SET autoGrade=\"{$autoGrade}\", pointsPossible=\"{$pointsPossible}\" WHERE eid=\"{$eid}\" AND ucid=\"{$ucid}\"";
+$qResult6 = $connection->query($query6);
 
 //adds grade given by auto grader to the DB
 $qidList = $j->qids;
 foreach($qidList as &$qidJSON){
   $qid = $qidJSON->qid;
-  $pointList = $qidJSON->points;
+  $deductions = $qidJSON->deductions;
+  $autoPoints = $qidJSON->autoPoints;
 
-  $points = "";
-  foreach($pointList as &$point){
-    $points = $points . "{$point},";
+  $query7 = "UPDATE EXAM_POINTS SET autoPoints=\"{$autoPoints}\" WHERE eid=\"{$eid}\" AND ucid=\"{$ucid}\" AND qid=\"{$qid}\"";
+  $qResult7 = $connection->query($query7);
+
+  foreach($deductions as &$deduct){
+    $query8 = "INSERT INTO EXAM_DEDUCTIONS VALUES (\"{$eid}\", \"{$ucid}\", \"{$qid}\", \"{$deduct}\")";
+    $qResult8 = $connection->query($query8);
   }
-  $points = substr($points, 0, -1);
-
-
-  $q = "UPDATE EXAM_POINTS SET autoPoints=\"{$points}\" WHERE eid=\"{$eid}\" AND ucid=\"{$ucid}\" AND qid=\"{$qid}\"";
-  $r = $c->query($q);
 }
 
-?>
+mysqli_close($connection);
+//end of file

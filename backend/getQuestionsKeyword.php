@@ -1,7 +1,7 @@
 <?php
 
 /*
-Sends all question from DB to frontend.
+Sends list of questions from DB to frontend that have a keyword in a prompt
 Version: release candidate
 Author: Giancarlo Calle
 */
@@ -15,7 +15,9 @@ if ($connection->connect_error){
   die("Could not connect to SQL database. Error: " . $connection -> connect_error);
 }
 
-$query = "SELECT * FROM QUESTIONS;";
+$substring = $_POST["substring"];
+
+$query = "SELECT * FROM QUESTIONS WHERE prompt LIKE \"%{$substring}%\";";
 $queryResult = $connection->query($query);
 
 $json = "[";
@@ -34,7 +36,6 @@ while($row = mysqli_fetch_assoc($queryResult)){
 }
 $json = substr($json, 0, -1); //removes last comma
 $json = $json . " ]";
-echo $json;
 
-mysqli_close($connection);
+echo $json;
 //end of file

@@ -1,11 +1,12 @@
 <?php
 
 /*
-Echoes all exams that have been auto-graded but need a final grade.
-Version: beta
+Echoes auto-graded exams for the instructor
+Version: release candidate
 Author: Giancarlo Calle
 */
 
+//connects to DB
 $serverName = "sql.njit.edu"; //server name (mysql)
 $userName = "gc288"; //giancarlo's ucid
 $serverPassword = "camilla56"; //super secret password, avert your eyes!
@@ -15,14 +16,15 @@ if ($connection->connect_error){
   die("Could not connect to SQL database. Error: " . $connection -> connect_error);
 }
 
-$json = "["; //of the form: [{"eid":"eid1", "etitle":"Sample", "ucid":"gc288", "autoGrade": "49/50"}, {...}, ...]
-
+//grabs exams from the DB
 $query = "SELECT S.eid, S.ucid, S.autoGrade, E.etitle FROM EXAM_STATUS S, EXAMS E WHERE E.eid = S.eid AND S.status = \"Auto-Graded\"";
 $queryResult = $connection->query($query);
-
 if($queryResult->num_rows == 0){
-  exit("[]");
+  exit("[]"); //echeos empty list if there are no exams
 }
+
+//creates json with list of exams to echo for frontend
+$json = "[";
 while($row = mysqli_fetch_assoc($queryResult)){
   $eid = $row["eid"];
   $ucid = $row["ucid"];
@@ -34,4 +36,5 @@ while($row = mysqli_fetch_assoc($queryResult)){
 $json = substr($json, 0, -1); //removes last comma
 $json = $json . " ]";
 echo $json;
-?>
+
+//end of file
