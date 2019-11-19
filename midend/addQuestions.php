@@ -14,6 +14,8 @@ $i4 = $_POST['in4'];
 $o4 = $_POST['out4'];
 $i5 = $_POST['in5'];
 $o5 = $_POST['out5'];
+$i6 = $_POST['in6'];
+$o6 = $_POST['out6'];
 
 //send to BE
 $url = 'https://web.njit.edu/~gc288/490/questionAdd.php';
@@ -33,6 +35,8 @@ $q = [
     'out4' => $o4,
     'in5' => $i5,
     'out5' => $o5,
+	'in6' => $i6,
+	'out6' => $o6,
 ];
 $opts = [
     CURLOPT_URL => $url,
