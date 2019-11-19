@@ -37,4 +37,5 @@ $json = substr($json, 0, -1); //removes last comma
 $json = $json . " ]";
 echo $json;
 
+mysqli_close($connection);
 //end of file
