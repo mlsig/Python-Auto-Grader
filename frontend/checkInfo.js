@@ -11,7 +11,7 @@ function checkInfo(form)
       creds = creds.level;
       if((creds)=="i")
       {
-          window.location.pathname = '/~aa2296/frontInstructor.php';
+          window.location.pathname = '/~aa2296/frontInstructor.php'; 
       }
       else if ((creds)=="s")
       {

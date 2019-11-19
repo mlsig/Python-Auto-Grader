@@ -4,7 +4,7 @@ function tryThis()
 {
   var ajax= new XMLHttpRequest();
   ajax.onreadystatechange = function()
-  {
+  { 
     if(ajax.readyState == 4 && ajax.status == 200)
     {
       document.getElementById("ucidHolder").innerHTML=this.responseText;
@@ -59,7 +59,7 @@ function submitTest()
   var tosubmit = '{"eid":"'+document.getElementById("storeTest").innerHTML+'",'
     +'"ucid":"'+ucid+'",';
   tosubmit += '"solutions":[';
-  for(var i=3; i<qtable.rows.length; i+=5)
+  for(var i=5; i<qtable.rows.length; i+=6)
   {
     tosubmit += '{"qid":"'+qtable.rows[i].cells[0].innerHTML+'",';
     tosubmit += '"sol":"'+qtable.rows[i+1].cells[0].children[0].value+'"},';
@@ -80,24 +80,25 @@ function takeTest(eid)
   {
     if(ajax.readyState == 4 && ajax.status == 200)
     {
+      
       var display = document.getElementById("takeTest");
       var response = JSON.parse(this.responseText);
       document.getElementById("storeTest").innerHTML = response["eid"];
-      var toAdd = '<br><h1>'+response["etitle"]+'</h1></br>';
-      toAdd+='<table id="questionTable">';
+      toAdd='<br><br><table id="questionTable"><tr><td colspan="2"><h1>'+response["etitle"]+'</h1></td></tr>';
+      
       var questions = response["qids"];
       
       for(var i=0; i<questions.length; i++)
       {
-        toAdd += '<tr><td>Question '+(i+1)+'</td><td>Question Title: '+questions[i]["qtitle"]+'</td>'
-        toAdd += '<td>Point Value: '+questions[i]["points"]+'</td></tr>';
-        toAdd +='<tr><td>Question Prompt: '+questions[i]["prompt"]+'</td></tr>';
-        toAdd +='<tr><td>Enter Your Solution Below</td></tr>';
+        toAdd += '<tr><td align="left" width="350px"><b><u>Question '+(i+1)+'</b></u></td></tr>';
+        toAdd += '<tr><td align="left" height="50">Question Title: '+questions[i]["qtitle"]+'</td><td align="left" width="350px">Point Value: '+questions[i]["points"]+'</td></tr>';
+        toAdd +='<tr><td colspan="2" align="left">Question Prompt: '+questions[i]["prompt"]+'</td></tr>';
+        toAdd +='<tr><td colspan="2" height="50" align="left">Enter Your Solution Below</td></tr>';
         toAdd += '<tr style="display: none;"><td>'+questions[i]["qid"]+'</td></tr>';
-        toAdd +='<tr><td><textarea rows="10" cols="30" placeholder="Enter solution here"></textarea></td></tr>';
+        toAdd +='<tr><td colspan="2" align="left"><textarea rows="10" cols="70" placeholder="Enter solution here"></textarea></td></tr>';
       }
       toAdd += '</table>'; 
-      toAdd += '<br><input type="button" value="Submit Test" onclick="submitTest();"/>';
+      toAdd += '<br><input type="button" value="Submit Test" onclick="submitTest();"/><br><br><br>';
       display.innerHTML+=toAdd;
       
     }

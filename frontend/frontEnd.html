@@ -10,9 +10,25 @@
     {
 		padding: 1px;
 		text-align: center;
-		background: #cb37d0;
+		background: black;
 		color: white;
 		text-align: center;
+    }
+    .dataContent
+    {
+    font-size:24px;
+    }
+    input[type="text"]
+    {
+    font-size:20px;
+    }
+    input[type="password"]
+    {
+    font-size:20px;
+    }
+    input[type="button"]
+    {
+    font-size:20px;
     }
     </style>
 </head>
@@ -30,11 +46,11 @@
    <form class ="login-form" id="userform" style="text-align:center">
    <br><br>
     <label id="UCLable" for='UCIDField'>Enter your UCID:</label>
-    <input id="ucid" name="ucid" type="text">
+    <input id="ucid" name="ucid" size="8" type="text">
     <br><br>
-    <label id='passLable' for='passField'>Enter your password:      
+    <label id='passLable' for='passField'>Enter your Password:      
     </label>
-    <input id="pass" name="pass" type="password">
+    <input id="pass" name="pass" size="12" type="password">
     <br><br>
     <input type="button" id="loginButton" value ="Login" onclick="checkInfo(this.form)"/>
 	</form>

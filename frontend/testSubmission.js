@@ -52,7 +52,6 @@ function chooseGraded()
   
   }
   ajax.open("POST", "https://web.njit.edu/~ms2437/cs490/rc/readyExams.php", true);
- // ajax.open("POST", "https://web.njit.edu/~gc288/490/examStudentGraded.php", true);
   ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   var sendUcid="ucid="+ucid;
   ajax.send(sendUcid);
@@ -72,20 +71,24 @@ function seeGraded(eid)
       var display = document.getElementById("gradedTest");
       display.innerHTML="";
       var response = JSON.parse(this.responseText);
-      var toAdd = '<br><table id="testT">'; 
+      var toAdd = '<br><table id="testT style="border-spacing: 10px 10px;"">'; 
       toAdd += '<tr><td width="150px">Test Title</td><td width="50px">Test Grade</td></tr>';
-      toAdd += '<tr><td width="150px">'+response["etitle"]+'</td><td width="50px">'+response["finalGrade"]+'</tr></table>';
-      toAdd+='<table id="questionTable">';
+      toAdd += '<tr><td width="150px"><b>'+response["etitle"]+'</b></td><td width="50px"><b>'+response["finalGrade"]+'</b></tr>';
+
       var questions = response["questions"];
         
-      for(var j=0; j<questions.length; j++)
+      for(var j=0; j<questions.length; j++) 
       {
-        toAdd += '<tr><td width="50px">Question Title: '+questions[j]["qtitle"]+'</td></tr>';
-        toAdd +='<tr><td width="50px">Question Prompt: '+questions[j]["prompt"]+'</td></tr>';
-        toAdd +='<tr><td width="50px">Questions Grade: '+questions[j]["points"]+'</td></tr>';
-        toAdd +='<tr><td width="50px">Your solution</td></tr>';
-        toAdd +='<r><td style="white-space: pre-wrap" width="50px">'+questions[j]["sol"]+'</td></tr>';
-        toAdd +='<tr><td width="50px">Comments(if any): '+questions[j]["comment"]+'</td></tr><tr height="20"></tr>';
+        toAdd+='<tr height="10px"></tr>';
+        toAdd += '<tr><td width="50px">Question Title:</td><td width="150px">'+questions[j]["qtitle"]+'</td></tr>';
+        toAdd +='<tr><td height="50px" width="50px">Question Prompt:</td><td width="150px">'+questions[j]["prompt"]+'</td></tr>';
+        toAdd +='<tr><td width="50px">Questions Grade:</td><td>'+questions[j]["points"]+'</td></tr>';
+        toAdd += '<tr height="20px"></tr>';
+        toAdd +='<tr><td colspan="2"><u>Your solution</u></td></tr>';
+        toAdd +='<tr><td colspan="2" style="white-space: pre-wrap">'+questions[j]["sol"]+'</td></tr>';
+        toAdd+= '<tr height="20px"></tr>';
+        toAdd +='<tr><td colspan="2" >Comments(if any): </td></tr>';
+        toAdd +='<tr><td colspan="2" style="white-space: pre-wrap">'+questions[j]["comment"]+'</td></tr><tr height="20"></tr>';
       }
       toAdd+= '<tr></tr><tr></tr>';
       toAdd += '</table>'; 
@@ -95,7 +98,7 @@ function seeGraded(eid)
   }
   ajax.open("POST", "https://web.njit.edu/~ms2437/cs490/rc/getExamGraded.php", true);
   ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-  var sendUcid="ucid="+ucid+"&eid=eid0";
+  var sendUcid="ucid="+ucid+"&eid="+eid;
   ajax.send(sendUcid);
 }
 

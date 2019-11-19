@@ -1,35 +1,20 @@
 .header
-    {
-  		padding: 1px;
+{
+  		padding: 5px;
   		text-align: center;
-  		background: #cb37d0;
+  		background: #D22630;
   		color: white;
-    }
-
-.split {
-  height: 100%;
-  width: 50%;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  overflow-x: hidden;
-  padding-top: 20px;
+      top: 0;
+      height: 10%;
 }
 
-/* Control the left side */
-.left {
-  left: 0;
-}
-
-/* Control the right side */
-.right {
-  right: 0;
-}
 
 .centered {
   position: absolute;
-  top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  top: 30%;
+  transform: translate(-50%, -5px);
   text-align: center;
-}    
+  height: 70%;
+}
+ 
