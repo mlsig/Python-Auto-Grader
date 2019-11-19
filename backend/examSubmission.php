@@ -18,7 +18,7 @@ if ($connection->connect_error){
 
 //credentials: (codeJSON)
 $codeJSON = $_POST["codeJSON"];
-$codeJSON = "{\"eid\": \"eid0\", \"ucid\":\"gc288\", \"solutions\":[{\"qid\":\"qid0\", \"sol\":\"def returnDouble(num)\n\treturn 4\"},{\"qid\":\"qid1\", \"sol\":\"def returnHalf(num):\\n\\treturn num*.5\"}] }";
+//$codeJSON = "{\"eid\": \"eid0\", \"ucid\":\"gc288\", \"solutions\":[{\"qid\":\"qid0\", \"sol\":\"def returnDouble(num)\n\treturn 4\"},{\"qid\":\"qid1\", \"sol\":\"def returnHalf(num):\\n\\treturn num*.5\"}] }";
 $codeJSON = strtr($codeJSON, array("\n" => "\\n",  "\t" => "\\t")); //ensures correct json format by removing newlines and tabs
 $decoded = json_decode($codeJSON);
 $eid = $decoded->eid;
