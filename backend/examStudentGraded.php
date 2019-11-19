@@ -18,7 +18,6 @@ if ($c->connect_error){
 
 //credentials (ucid)
 $ucid = $_POST["ucid"];
-$ucid = "gc288";
 
 //grabs eids from graded exams
 $q = "SELECT eid, finalGrade FROM EXAM_STATUS WHERE ucid=\"{$ucid}\" AND status=\"Graded\"";

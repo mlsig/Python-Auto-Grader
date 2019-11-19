@@ -1,8 +1,8 @@
 <?php
 
 /*
-Backend to echo back a specific exam to a student with exam status, submitted code if any, points given if any, etc.
-Version: beta
+Echoes back an exam to take.
+Version: release candidate
 Author: Giancarlo Calle
 */
 
@@ -33,6 +33,7 @@ while($row = mysqli_fetch_assoc($qResult)){
   $qid = $row["qid"];
   $qtitle = $row["qtitle"];
   $prompt = $row["prompt"];
+  $points = $row["points"];
 
   $toAdd = "{\"qid\":\"{$qid}\", \"qtitle\":\"{$qtitle}\", \"prompt\":\"{$prompt}\", \"points\":\"{$points}\"},";
   $json = $json . $toAdd;
@@ -41,4 +42,5 @@ $json = substr($json, 0, -1); //removes last comma
 $json = $json . "]}";
 echo $json;
 
-?>
+mysqli_close($c);
+//end of file

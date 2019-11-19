@@ -62,7 +62,5 @@ while($ucid = mysqli_fetch_assoc($qResult)["ucid"]){
   $r = $connection->query($q);
 }
 
-//closes connection
 mysqli_close($connection);
-
 //end of file

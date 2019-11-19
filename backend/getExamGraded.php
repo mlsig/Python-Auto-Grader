@@ -22,10 +22,8 @@ $eid = $_POST["eid"];
 
 //grabs eids from graded exams
 $q = "SELECT finalGrade FROM EXAM_STATUS WHERE ucid=\"{$ucid}\" AND eid=\"{$eid}\"";
-echo $q;
 $qResult = $c->query($q);
 $finalGrade = mysqli_fetch_assoc($qResult)["finalGrade"];
-echo $finalGrade;
 
 //grabs title
 $q = "SELECT etitle FROM EXAMS WHERE eid=\"{$eid}\"";
@@ -50,7 +48,6 @@ while($info = mysqli_fetch_assoc($r)){
 }
 $qInfo = substr($qInfo, 0, -1); //removes last comma
 $qInfo = $qInfo . "]";
-
 $json = "{\"eid\":\"{$eid}\", \"etitle\":\"{$etitle}\", \"finalGrade\":\"{$finalGrade}\", \"questions\":" . $qInfo . "}";
 echo $json;
 
